@@ -1,6 +1,10 @@
 # Build
 build
 
+# Config files which might contains sensitive data
+sdkconfig
+sdkconfig.old
+
 # Prerequisites
 *.d
 
