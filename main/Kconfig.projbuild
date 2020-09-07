@@ -16,4 +16,18 @@ menu "WiFi Microphone Config"
         default 5
         help
             The maximum number of times to try to reconnect to the AP.
+
+    config WIFI_MICROPHONE_IP_ADDRESS
+        string "IP Address"
+        default "192.168.1.1"
+        help
+            IPV4 address to which the microphone will send audio packets.
+    
+    config WIFI_MICROPHONE_PORT
+        int "Port"
+        range 0 65535
+        default 3333
+        help
+            The remote port to which the microphone example will send audio packets.
+
 endmenu
