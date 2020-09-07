@@ -16,6 +16,7 @@
 
 #include "wifi/wifi.h"
 #include "udp/udp.h"
+#include "opus/opus.h"
 
 #ifdef CONFIG_IDF_TARGET_ESP32
 #define CHIP_NAME "ESP32"
@@ -40,6 +41,16 @@ union packet {
 
 void UDPTask(void *) {
   UDPSocket s(CONFIG_WIFI_MICROPHONE_IP_ADDRESS, CONFIG_WIFI_MICROPHONE_PORT);
+
+  OpusEncoder *enc;
+  int error = 0;
+  enc = opus_encoder_create(48000, 1, OPUS_APPLICATION_AUDIO, &error);
+
+  if(error == OPUS_OK)
+    ESP_LOGI("OPUS", "Opus encoder created successfully!");
+  else
+    ESP_LOGE("OPUS", "Error creating Opus encoder!");
+  
 
   packet p;
 
