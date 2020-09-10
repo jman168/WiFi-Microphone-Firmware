@@ -19,14 +19,20 @@
 #include "udp/udp.h"
 #include "opus/opus.h"
 #include "microphone/microphone.h"
+#include "imath.h"
 
 extern "C" {
     void app_main();
 }
 
-union UDPPacket {
+struct UDPPacket_t {
+  uint32_t packet_number;
   int16_t samples[256];
-  char data[256*2];
+};
+
+union UDPPacket {
+  UDPPacket_t packet;
+  char data[256*2 + 4];
 };
  
 
@@ -39,20 +45,16 @@ void UDPTask(void *) {
   UDPPacket packet = {};
 
   size_t bytesRead;
-  int32_t sum;
+  uint32_t packet_number = 0;
 
-  i2s_adc_enable(I2S_NUM_0);
-  startTime = esp_timer_get_time();
-  for(int iteration = 0; iteration < 1875; iteration++) {
-    bytesRead = mic.getSamples(packet.samples);
-    if(bytesRead != 256*2)
-      ESP_LOGW("ADC", "Did not get full buffer!");
-    else
-      sock.sendPacket(packet.data, 256*2);
+  isin(0);
+
+  while(1) {
+    bytesRead = mic.getSamples(packet.packet.samples);
+    packet.packet.packet_number = packet_number;
+    sock.sendPacket(packet.data, sizeof(UDPPacket_t));
+    packet_number++;
   }
-  printf("Average frame encode time: %" PRIu64 "us\n", (esp_timer_get_time()-startTime)/1875);
-
-  while(1) {}
 }
 
 
