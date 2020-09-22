@@ -2,8 +2,7 @@
 build
 
 # Config files which might contains sensitive data
-sdkconfig
-sdkconfig.old
+main/include/wifi/config.h
 
 # Prerequisites
 *.d

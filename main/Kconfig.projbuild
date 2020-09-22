@@ -1,16 +1,4 @@
 menu "WiFi Microphone Config"
-    config WIFI_MICROPHONE_WIFI_SSID
-        string "WiFi SSID"
-        default "ssid"
-        help
-            SSID (network name) for the microphone to connect to.
-
-    config WIFI_MICROPHONE_WIFI_PASSWORD
-        string "WiFi Password"
-        default "password"
-        help
-            WiFi password (WPA or WPA2) for the microphone to use.
-
     config WIFI_MICROPHONE_MAXIMUM_RETRY
         int "Maximum retry"
         default 5
@@ -29,5 +17,4 @@ menu "WiFi Microphone Config"
         default 3333
         help
             The remote port to which the microphone example will send audio packets.
-
 endmenu

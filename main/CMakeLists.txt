@@ -3,7 +3,6 @@ idf_component_register(SRCS
                         "src/wifi/wifi.cpp"
                         "src/udp/udp.cpp"
                         "src/microphone/microphone.cpp"
-                        "src/imath.cpp"
                         INCLUDE_DIRS "include")
 
 add_library(opus STATIC IMPORTED)

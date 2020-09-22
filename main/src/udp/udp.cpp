@@ -7,6 +7,7 @@ UDPSocket::UDPSocket(const char *addr, uint16_t port) {
 
     sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_IP);
     connect(sock, (sockaddr *)&dest_addr, sizeof(dest_addr));
+
 }
 
 void UDPSocket::sendPacket(const void *data, size_t length) {

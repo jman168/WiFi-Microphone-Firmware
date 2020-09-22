@@ -1,6 +1,7 @@
 #include "stdint.h"
 
 #include "lwip/sockets.h"
+#include "esp_log.h"
 
 class UDPSocket {
     public:
