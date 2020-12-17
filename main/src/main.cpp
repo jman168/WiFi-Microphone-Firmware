@@ -21,6 +21,7 @@
 #include "udp/udp.h"
 #include "opus/opus.h"
 #include "microphone/microphone.h"
+#include "TCP/TCP.h"
 
 #define SEARCH_INTERATIONS 375
 #define TARGET_MICROSECONDS 6000000
@@ -105,6 +106,8 @@ void app_main()
   error = opus_encoder_ctl(encoder, OPUS_SET_BITRATE(32000));
   if(error < 0)
     ESP_LOGE("OPUS", "Error setting opus encoder bitrate.");
+
+  send_wakeup(FRAME_SIZE, 48000);
 
   xTaskCreatePinnedToCore(UDPTask, "UDP", 65536, NULL, 1, NULL, 0);
   // UDPTask(NULL);

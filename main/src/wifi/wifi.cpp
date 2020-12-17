@@ -51,8 +51,12 @@ void wifi_init_sta()
 
     wifi_config_t wifi_config = {};
     strcpy((char*)wifi_config.sta.ssid, WIFI_SSID);
+    #ifndef NO_PASS
     strcpy((char*)wifi_config.sta.password, WIFI_PASS);
     wifi_config.sta.threshold.authmode = WIFI_AUTH_WPA2_PSK;
+    #else 
+    wifi_config.sta.threshold.authmode = WIFI_AUTH_OPEN;
+    #endif
     wifi_config.sta.pmf_cfg.capable = true;
     wifi_config.sta.pmf_cfg.required = false;
 
