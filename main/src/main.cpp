@@ -16,12 +16,8 @@
 #include "esp_log.h"
 #include "esp_timer.h"
 
-#include "wifi/wifi.h"
-#include "udp/packet.h"
-#include "udp/udp.h"
 #include "opus/opus.h"
 #include "microphone/microphone.h"
-#include "TCP/TCP.h"
 
 #define SEARCH_INTERATIONS 375
 #define TARGET_MICROSECONDS 6000000
@@ -30,7 +26,7 @@
 #define FRAME_TIME 5000 // frame time in us
 #define FRAME_TIME_ALLOWED_VARIATION 1000 // the maximum time in us over the frame time that is allowed
 
-// #define BENCHMARK_LOOP_TIME
+#define BENCHMARK_LOOP_TIME
 
 extern "C" {
     void app_main();
@@ -45,18 +41,13 @@ int error;
 
 void UDPTask(void *) {
   Microphone mic(FRAME_SIZE);
-  UDPSocket sock(CONFIG_WIFI_MICROPHONE_IP_ADDRESS, CONFIG_WIFI_MICROPHONE_PORT);
-
-  UDPPacket packet = {};
 
   size_t bytesRead;
+  size_t frameSize;
   uint32_t packet_number = 0;
-  int64_t last = 9999999999;
-  int64_t current = 0;
 
   int64_t loop_start, loop_end;
-  
-  TaskHandle_t warning_task;
+  uint8_t data[32];
 
 #ifdef BENCHMARK_LOOP_TIME
   loop_start = esp_timer_get_time();
@@ -67,10 +58,7 @@ void UDPTask(void *) {
 
     bytesRead = mic.getSamples(samples); // Read the samples
     
-    packet.packet.data_length = opus_encode(encoder, samples, FRAME_SIZE, packet.packet.data, 40); // Encode the data and set the data size of the packet
-    packet.packet.packet_number = packet_number; // Set the packet number for packet loss detection on the other side
-
-    sock.sendPacket(packet.data, packet.packet.data_length+PACKET_HEADER_SIZE); // Send over the packet, but only the minimum required data
+    frameSize = opus_encode(encoder, samples, FRAME_SIZE, data, 32); // Encode the data and set the data size of the packet
 
     packet_number++; // Increment the packet number
   }
@@ -92,8 +80,6 @@ void app_main()
     ret = nvs_flash_init();
   }
   ESP_ERROR_CHECK(ret);
-
-  wifi_init_sta();
   
   encoder = opus_encoder_create(48000, 1, OPUS_APPLICATION_AUDIO, &error);
   if(error < 0)
@@ -103,11 +89,9 @@ void app_main()
   if(error < 0)
     ESP_LOGE("OPUS", "Error setting opus encoder complexity.");
 
-  error = opus_encoder_ctl(encoder, OPUS_SET_BITRATE(32000));
+  error = opus_encoder_ctl(encoder, OPUS_SET_BITRATE(42000));
   if(error < 0)
     ESP_LOGE("OPUS", "Error setting opus encoder bitrate.");
-
-  send_wakeup(FRAME_SIZE, 48000);
 
   xTaskCreatePinnedToCore(UDPTask, "UDP", 65536, NULL, 1, NULL, 0);
   // UDPTask(NULL);
