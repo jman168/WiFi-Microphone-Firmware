@@ -18,6 +18,7 @@
 
 #include "opus/opus.h"
 #include "microphone/microphone.h"
+#include "esp_nrf24.h"
 
 #define SEARCH_INTERATIONS 375
 #define TARGET_MICROSECONDS 6000000
@@ -26,11 +27,13 @@
 #define FRAME_TIME 5000 // frame time in us
 #define FRAME_TIME_ALLOWED_VARIATION 1000 // the maximum time in us over the frame time that is allowed
 
-#define BENCHMARK_LOOP_TIME
+// #define BENCHMARK_LOOP_TIME
 
 extern "C" {
     void app_main();
 }
+
+nrf24_t nrf24;
 
 int16_t samples[FRAME_SIZE];
 
@@ -59,6 +62,7 @@ void UDPTask(void *) {
     bytesRead = mic.getSamples(samples); // Read the samples
     
     frameSize = opus_encode(encoder, samples, FRAME_SIZE, data, 32); // Encode the data and set the data size of the packet
+    nrf24_send_data(&nrf24, data, frameSize);
 
     packet_number++; // Increment the packet number
   }
@@ -92,6 +96,13 @@ void app_main()
   error = opus_encoder_ctl(encoder, OPUS_SET_BITRATE(42000));
   if(error < 0)
     ESP_LOGE("OPUS", "Error setting opus encoder bitrate.");
+
+  nrf24_init(&nrf24, SPI2_HOST, 13, 12, 14, 27, 26);
+  nrf24_set_crc(&nrf24, NRF24_CRC_1BYTE);
+  nrf24_set_data_rate(&nrf24, NRF24_2MBPS);
+  nrf24_set_rf_channel(&nrf24, 0);
+  nrf24_set_payload_length(&nrf24, 0);
+  nrf24_power_up_tx(&nrf24);
 
   xTaskCreatePinnedToCore(UDPTask, "UDP", 65536, NULL, 1, NULL, 0);
   // UDPTask(NULL);
